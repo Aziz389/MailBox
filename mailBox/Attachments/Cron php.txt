@@ -1,0 +1,20 @@
+cro* Cron : 
+Cron est un planificateur de tâches.Il vous permet de programmer et d'automatiser l'exécution de scripts ou de commandes à des intervalles ou des moments spécifiques. Les tâches cron sont couramment utilisées pour des tâches répétitives, telles que la mise à jour d'une base de données, la génération de rapports ou l'exécution régulière de la maintenance du système.
+
+*Cron php : 
+
+PHP est un langage de script populaire couramment utilisé pour le développement web. En ce qui concerne cron, PHP peut être utilisé pour exécuter automatiquement des scripts ou des commandes PHP à des moments programmés.
+
+Pour configurer une tâche cron afin d'exécuter un script PHP, vous devez généralement suivre ces étapes :
+1- Ouvrez votre terminal ou accédez à votre interface en ligne de commande.
+2- Tapez la commande crontab -e pour éditer la table cron de votre utilisateur.
+3- Dans la table cron, ajoutez une nouvelle ligne pour votre tâche cron en respectant le format suivant :
+	* * * * * php /chemin/vers/votre/script.php
+
+Les cinq '*' correspondent respectivement à la minute, à l'heure, au jour du mois, au mois et au jour de la semaine. Vous pouvez spécifier une valeur unique, une liste séparée par des virgules ou une plage de valeurs. 
+
+4- Modifiez '/chemin/vers/votre/script.php' en remplaçant par le chemin absolu de votre script PHP.
+5-Enregistrez les modifications et quittez l'éditeur de texte.
+6-Votre tâche cron est maintenant configurée et s'exécutera automatiquement selon le planning défini.
+
+NB:Assurez-vous que le fichier script PHP est exécutable ('chmod +x /chemin/vers/votre/script.php') pour que cron puisse l'exécuter correctement.
