@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Threading.Tasks;
 
 namespace mailBox
@@ -29,7 +30,10 @@ namespace mailBox
                     {
                         Console.WriteLine(attachmentName);
                     }
+
                     i++;
+                    
+
                 }
 
 

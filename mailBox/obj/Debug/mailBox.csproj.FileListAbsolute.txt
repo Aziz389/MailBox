@@ -32,6 +32,5 @@ D:\C#\mailBox\bin\Debug\System.Threading.Tasks.Extensions.xml
 D:\C#\mailBox\bin\Debug\System.ValueTuple.xml
 D:\C#\mailBox\obj\Debug\mailBox.csproj.CopyComplete
 D:\C#\mailBox\bin\Debug\Newtonsoft.Json.dll
-D:\C#\mailBox\bin\Debug\redmine-net-api.dll
 D:\C#\mailBox\bin\Debug\Newtonsoft.Json.xml
-D:\C#\mailBox\bin\Debug\redmine-net-api.xml
+D:\C#\mailBox\bin\Debug\Redmine.Net.Api.dll

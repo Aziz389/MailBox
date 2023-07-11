@@ -7,6 +7,9 @@ using System.IO;
 using IOFile = System.IO.File;
 using Redmine.Net.Api;
 using Redmine.Net.Api.Types;
+using System;
+
+
 
 
 namespace mailBox
@@ -17,8 +20,12 @@ namespace mailBox
         public string EmailSubject { get; set; }
         public string EmailBody { get; set; }
         public List<string> AttachmentNames { get; set; } 
+       
+
 
     }
+  
+
 
     public class MimeEmails
     {
@@ -70,22 +77,40 @@ namespace mailBox
                             }
                         }
                     }
-                    // Ticket Creation Logic - Start
-                    // Connect to the Redmine API using the access key
-                    /*string redmineUrl = "https://your-redmine-url.com";
-                    string apiKey = "your-api-access-key";
+
+
+                    string redmineUrl = "support.acssfax.com";
+                    string apiKey = "7b543c489589f420db219addbea683dfc09a107d";
                     RedmineManager redmineManager = new RedmineManager(redmineUrl, apiKey);
 
-                    // Prepare the ticket data
+                    Console.WriteLine(emailDetails.EmailSubject);
+
+                    IdentifiableName Project = new IdentifiableName { Id = 1 };
+
+
                     Issue newIssue = new Issue
                     {
                         Subject = emailDetails.EmailSubject,
                         Description = emailDetails.EmailBody,
-                        // Set other necessary fields, such as project, tracker, priority, assigned to, etc.
+                       
+                        Project = new IdentifiableName { Id = 60 }, // Set the Project ID
+                        Tracker = new IdentifiableName { Id = 5 }, // Set the Tracker ID
+                        Priority = new IdentifiableName { Id = 2 }, // Set the Priority ID
+                        Status = new IdentifiableName { Id = 1} // Set the Status ID
                     };
 
-                    // Make an API request to create the ticket
-                    //Issue createdIssue = redmineManager.CreateObject(newIssue);
+                    Issue createdIssue = null;
+                    try
+                    {
+                        createdIssue = redmineManager.CreateObject(newIssue);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("problem has occured during creating issue   => " + ex.Message + "   ,; " + createdIssue);
+
+                    }
+
+
 
                     if (createdIssue != null)
                     {
@@ -94,8 +119,8 @@ namespace mailBox
                     else
                     {
                         Console.WriteLine("Failed to create ticket.");
-                    }*/
-                    
+                    }
+
 
                     listEmailDetails.Add(emailDetails);
 
