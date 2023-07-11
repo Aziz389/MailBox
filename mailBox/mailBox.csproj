@@ -47,7 +47,7 @@
       <HintPath>..\AutoTicketCreation\packages\MimeKit.4.1.0\lib\net47\MimeKit.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\AutoTicketCreation\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Redmine.Net.Api, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\redmine-net-api.0.10\lib\net\Redmine.Net.Api.dll</HintPath>

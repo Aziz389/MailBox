@@ -1,0 +1,138 @@
+using MimeKit;
+using MailKit.Net.Imap;
+using MailKit.Search;
+using MailKit;
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+namespace mailBox
+{
+    public class EmailDetails
+    {
+        public string EmailFrom { get; set; }
+        public string EmailSubject { get; set; }
+        public string EmailBody { get; set; }
+        public string AttachmentName { get; set; }
+    }
+
+    public class MimeEmails
+    {
+        public static List<EmailDetails> ReadMailItems(string server, int port, bool useSsl, string username, string password, string saveDirectory)
+        {
+            List<EmailDetails> listEmailDetails = new List<EmailDetails>();
+
+            using (var client = new ImapClient())
+            {
+                client.Connect(server, port, useSsl);
+                client.Authenticate(username, password);
+
+                var inbox = client.Inbox;
+                // Open the inbox with read and write access
+                inbox.Open(FolderAccess.ReadWrite); 
+
+                var query = SearchQuery.All;
+                var uids = inbox.Search(query);
+
+                foreach (var uid in uids)
+                {
+                    var message = inbox.GetMessage(uid);
+
+                    EmailDetails emailDetails = new EmailDetails
+                    {
+                        EmailFrom = message.From.ToString(),
+                        EmailSubject = message.Subject,
+                        EmailBody = message.TextBody,
+                        AttachmentName = null 
+                    };
+                    // Remove signature from the email body
+                    emailDetails.EmailBody = RemoveSignature(message.TextBody);
+
+                    foreach (var attachment in message.Attachments)
+                    {
+                        emailDetails.AttachmentName = attachment.ContentDisposition?.FileName;
+
+                        // Save the attachment to the path specified in the main program
+                        string savePath = Path.Combine(saveDirectory, emailDetails.AttachmentName);
+                        using (var stream = File.Create(savePath))
+                        {
+                            if (attachment is MimePart mimePart)
+                            {
+                                mimePart.Content.DecodeTo(stream);
+                            }
+                        }
+                    }
+
+                    listEmailDetails.Add(emailDetails);
+
+                    // Mark the message as read in outllok inbox
+                    inbox.AddFlags(uid, MessageFlags.Seen, true);
+                }
+
+                client.Disconnect(true);
+            }
+
+            return listEmailDetails;
+        }
+        private static string RemoveSignature(string emailBody)
+        {
+            if (emailBody == null)
+            {
+                return null; // Return null if the email body is null
+            }
+
+            // Find the index of the first occurrence of either "-" or "_"
+            int endIndex = emailBody.IndexOfAny(new[] { '-', '_' });
+
+            // Remove the signature and any content after it
+            if (endIndex >= 0)
+            {
+                emailBody = emailBody.Substring(0, endIndex);
+            }
+
+            return emailBody;
+        }
+
+
+
+
+
+    }
+}
+
+
+
+----------------------------------------------------------------------------------------
+
+
+
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace mailBox
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            var mails = Email.ReadMailItems();
+            int i = 1;
+            foreach (var mail in mails) {
+            Console.WriteLine("Mail No :" + i );
+                Console.WriteLine("Mail Received From :" + mail.EmailFrom);
+                Console.WriteLine("Mail Subject : " + mail.EmailSubject);
+                Console.WriteLine("Mail Body " + mail.EmailBody);
+                Console.WriteLine("attachement name "+ mail.attachmentName);
+                i+=1;
+            }
+            Console.ReadKey();
+                
+        }
+    }
+}

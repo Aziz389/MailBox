@@ -1,16 +1,14 @@
-﻿using MimeKit;
+﻿using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Search;
-using MailKit;
+using MimeKit;
 using System.Collections.Generic;
 using System.IO;
 using IOFile = System.IO.File;
 using Redmine.Net.Api;
 using Redmine.Net.Api.Types;
 using System;
-
-
-
+using System.Threading;
 
 namespace mailBox
 {
@@ -19,13 +17,8 @@ namespace mailBox
         public string EmailFrom { get; set; }
         public string EmailSubject { get; set; }
         public string EmailBody { get; set; }
-        public List<string> AttachmentNames { get; set; } 
-       
-
-
+        public List<string> AttachmentNames { get; set; }
     }
-  
-
 
     public class MimeEmails
     {
@@ -35,6 +28,7 @@ namespace mailBox
 
             using (var client = new ImapClient())
             {
+                //client.Timeout = -1;
                 client.Connect(server, port, useSsl);
                 client.Authenticate(username, password);
 
@@ -56,7 +50,7 @@ namespace mailBox
                         EmailBody = message.TextBody,
                         AttachmentNames = new List<string>()
                     };
-                    
+
                     emailDetails.EmailBody = RemoveSignature(message.TextBody);
 
                     foreach (var attachment in message.Attachments)
@@ -78,25 +72,21 @@ namespace mailBox
                         }
                     }
 
-
                     string redmineUrl = "support.acssfax.com";
                     string apiKey = "7b543c489589f420db219addbea683dfc09a107d";
                     RedmineManager redmineManager = new RedmineManager(redmineUrl, apiKey);
 
-                    Console.WriteLine(emailDetails.EmailSubject);
 
                     IdentifiableName Project = new IdentifiableName { Id = 1 };
-
 
                     Issue newIssue = new Issue
                     {
                         Subject = emailDetails.EmailSubject,
                         Description = emailDetails.EmailBody,
-                       
                         Project = new IdentifiableName { Id = 60 }, // Set the Project ID
                         Tracker = new IdentifiableName { Id = 5 }, // Set the Tracker ID
                         Priority = new IdentifiableName { Id = 2 }, // Set the Priority ID
-                        Status = new IdentifiableName { Id = 1} // Set the Status ID
+                        Status = new IdentifiableName { Id = 1 } // Set the Status ID
                     };
 
                     Issue createdIssue = null;
@@ -106,11 +96,8 @@ namespace mailBox
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("problem has occured during creating issue   => " + ex.Message + "   ,; " + createdIssue);
-
+                        Console.WriteLine("problem has occurred during creating issue => " + ex.Message + ",; " + createdIssue);
                     }
-
-
 
                     if (createdIssue != null)
                     {
@@ -118,14 +105,17 @@ namespace mailBox
                     }
                     else
                     {
-                        Console.WriteLine("Failed to create ticket.");
+                        Console.WriteLine("Failed to create a ticket.");
                     }
 
-
                     listEmailDetails.Add(emailDetails);
-
-                  
                     inbox.AddFlags(uid, MessageFlags.Seen, true);
+
+                    // Move the email to the destination folder
+                    var destinationFolder = inbox.GetSubfolder("Inbox read");
+                    inbox.MoveTo(uid, destinationFolder);
+
+                    
                 }
 
                 client.Disconnect(true);
@@ -133,17 +123,17 @@ namespace mailBox
 
             return listEmailDetails;
         }
+
         private static string RemoveSignature(string emailBody)
         {
             if (emailBody == null)
             {
-                return null; 
+                return null;
             }
 
             // Find the index of the first occurrence of either "-" or "_"
             int endIndex = emailBody.IndexOfAny(new[] { '-', '_' });
 
-            
             if (endIndex >= 0)
             {
                 emailBody = emailBody.Substring(0, endIndex);
@@ -151,10 +141,5 @@ namespace mailBox
 
             return emailBody;
         }
-
-
-
-
-
     }
 }
