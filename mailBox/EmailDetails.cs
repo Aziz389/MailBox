@@ -8,7 +8,9 @@ using IOFile = System.IO.File;
 using Redmine.Net.Api;
 using Redmine.Net.Api.Types;
 using System;
-using System.Threading;
+
+
+
 
 namespace mailBox
 {
@@ -18,6 +20,7 @@ namespace mailBox
         public string EmailSubject { get; set; }
         public string EmailBody { get; set; }
         public List<string> AttachmentNames { get; set; }
+        public List<Attachment> Attachments { get; set; } // Add this property
     }
 
     public class MimeEmails
@@ -69,6 +72,15 @@ namespace mailBox
                                     mimePart.Content.DecodeTo(stream);
                                 }
                             }
+
+                            // Create Attachment object and add it to the EmailDetails.Attachments list
+                            var attachmentData = new Attachment
+                            {
+                                FileName = fileName,
+                                Content = File.ReadAllBytes(savePath),
+                                ContentType = attachment.ContentType.MimeType
+                            };
+                            emailDetails.Attachments.Add(attachmentData);
                         }
                     }
 
@@ -86,8 +98,10 @@ namespace mailBox
                         Project = new IdentifiableName { Id = 60 }, // Set the Project ID
                         Tracker = new IdentifiableName { Id = 5 }, // Set the Tracker ID
                         Priority = new IdentifiableName { Id = 2 }, // Set the Priority ID
-                        Status = new IdentifiableName { Id = 1 } // Set the Status ID
-                    };
+                        Status = new IdentifiableName { Id = 1 }, // Set the Status ID
+                        Attachments = emailDetails.Attachments // Add the attachments to the issue
+                    
+                };
 
                     Issue createdIssue = null;
                     try
