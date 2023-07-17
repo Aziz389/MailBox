@@ -8,6 +8,7 @@ using IOFile = System.IO.File;
 using Redmine.Net.Api;
 using Redmine.Net.Api.Types;
 using System;
+using RestSharp;
 
 
 
@@ -20,7 +21,7 @@ namespace mailBox
         public string EmailSubject { get; set; }
         public string EmailBody { get; set; }
         public List<string> AttachmentNames { get; set; }
-        public List<Attachment> Attachments { get; set; } // Add this property
+       
     }
 
     public class MimeEmails
@@ -56,6 +57,28 @@ namespace mailBox
 
                     emailDetails.EmailBody = RemoveSignature(message.TextBody);
 
+
+
+                    string redmineUrl = "https://support.acssfax.com";
+                    string apiKey = "ae6bb29efb0ec4769cb40e2a89355f30cb2b81e8";
+                    RedmineManager redmineManager = new RedmineManager(redmineUrl, apiKey);
+
+
+                    IdentifiableName Project = new IdentifiableName { Id = 1 };
+
+                    Issue newIssue = new Issue
+                    {
+                        Subject = emailDetails.EmailSubject,
+                        Description = emailDetails.EmailBody,
+                        Project = new IdentifiableName { Id = 60 }, // Set the Project ID
+                        Tracker = new IdentifiableName { Id = 5 }, // Set the Tracker ID
+                        Priority = new IdentifiableName { Id = 2 }, // Set the Priority ID
+                        Status = new IdentifiableName { Id = 1 }, // Set the Status ID
+
+
+                    };
+
+                    Issue createdIssue = null;
                     foreach (var attachment in message.Attachments)
                     {
                         var fileName = attachment.ContentDisposition?.FileName;
@@ -73,37 +96,74 @@ namespace mailBox
                                 }
                             }
 
-                            // Create Attachment object and add it to the EmailDetails.Attachments list
-                            var attachmentData = new Attachment
+                            byte[] attachmentContent = IOFile.ReadAllBytes(savePath);
+
+                            var restClient = new RestClient(redmineUrl);
+                            var request = new RestRequest("uploads.json", Method.Post); 
+
+                            request.AddHeader("Content-Type", "application/octet-stream");
+                            request.AddParameter("attachment[filename]", fileName, ParameterType.QueryString);
+                            request.AddParameter("attachment[token]", apiKey, ParameterType.QueryString);
+                            request.AddParameter("application/octet-stream", attachmentContent, ParameterType.RequestBody); // Add the attachment content as a parameter
+
+                            var response = restClient.Execute(request);
+                            
+
+                            if (response.IsSuccessful)
                             {
-                                FileName = fileName,
-                                Content = File.ReadAllBytes(savePath),
-                                ContentType = attachment.ContentType.MimeType
-                            };
-                            emailDetails.Attachments.Add(attachmentData);
+                                // The attachment upload was successful
+                                var redmineAttachment = Newtonsoft.Json.JsonConvert.DeserializeObject<Attachment>(response.Content);
+
+                                // Check the redmineAttachment object and proceed accordingly
+                                if (redmineAttachment != null)
+                                {
+                                    // Create an attachment object with the uploaded file's token
+                                    Attachment attachmentObj = new Attachment
+                                    {
+                                        FileName = fileName,
+                                        ContentUrl = redmineAttachment.ContentUrl
+                                    };
+
+                                    // Add the attachment to the created issue
+                                    if (createdIssue.Attachments == null)
+                                        createdIssue.Attachments = new List<Attachment>();
+
+                                    createdIssue.Attachments.Add(attachmentObj);
+                                }
+                            }
+                            else
+                            {
+                                // The attachment upload failed
+                                Console.WriteLine("Attachment upload failed. Status code: " + response.StatusCode);
+                                Console.WriteLine("Error message: " + response.ErrorMessage);
+                                Console.WriteLine("Response content: " + response.Content);
+                            }
+
+
+                            if (response.IsSuccessful)
+                            {
+                                var redmineAttachment = Newtonsoft.Json.JsonConvert.DeserializeObject<Attachment>(response.Content);
+
+                                if (redmineAttachment != null)
+                                {
+                                    // Create an attachment object with the uploaded file's token
+                                    Attachment attachmentObj = new Attachment
+                                    {
+                                        FileName = fileName,
+                                        ContentUrl = redmineAttachment.ContentUrl
+                                    };
+
+                                    // Add the attachment to the created issue
+                                    if (createdIssue.Attachments == null)
+                                        createdIssue.Attachments = new List<Attachment>();
+
+                                    createdIssue.Attachments.Add(attachmentObj);
+                                }
+                            }
+
+
                         }
                     }
-
-                    string redmineUrl = "support.acssfax.com";
-                    string apiKey = "7b543c489589f420db219addbea683dfc09a107d";
-                    RedmineManager redmineManager = new RedmineManager(redmineUrl, apiKey);
-
-
-                    IdentifiableName Project = new IdentifiableName { Id = 1 };
-
-                    Issue newIssue = new Issue
-                    {
-                        Subject = emailDetails.EmailSubject,
-                        Description = emailDetails.EmailBody,
-                        Project = new IdentifiableName { Id = 60 }, // Set the Project ID
-                        Tracker = new IdentifiableName { Id = 5 }, // Set the Tracker ID
-                        Priority = new IdentifiableName { Id = 2 }, // Set the Priority ID
-                        Status = new IdentifiableName { Id = 1 }, // Set the Status ID
-                        Attachments = emailDetails.Attachments // Add the attachments to the issue
-                    
-                };
-
-                    Issue createdIssue = null;
                     try
                     {
                         createdIssue = redmineManager.CreateObject(newIssue);
@@ -129,7 +189,7 @@ namespace mailBox
                     var destinationFolder = inbox.GetSubfolder("Inbox read");
                     inbox.MoveTo(uid, destinationFolder);
 
-                    
+
                 }
 
                 client.Disconnect(true);

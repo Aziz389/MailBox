@@ -34,3 +34,11 @@ D:\C#\mailBox\obj\Debug\mailBox.csproj.CopyComplete
 D:\C#\mailBox\bin\Debug\Newtonsoft.Json.dll
 D:\C#\mailBox\bin\Debug\Newtonsoft.Json.xml
 D:\C#\mailBox\bin\Debug\Redmine.Net.Api.dll
+D:\C#\mailBox\bin\Debug\Microsoft.Bcl.AsyncInterfaces.dll
+D:\C#\mailBox\bin\Debug\RestSharp.dll
+D:\C#\mailBox\bin\Debug\System.Text.Encodings.Web.dll
+D:\C#\mailBox\bin\Debug\System.Text.Json.dll
+D:\C#\mailBox\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
+D:\C#\mailBox\bin\Debug\RestSharp.xml
+D:\C#\mailBox\bin\Debug\System.Text.Encodings.Web.xml
+D:\C#\mailBox\bin\Debug\System.Text.Json.xml
